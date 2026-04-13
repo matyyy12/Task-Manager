@@ -3,6 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
+from task.models import Task
 from .models import User
 from task.serializers import TaskSerializer
 from user.serializers import UserSerializer
@@ -63,6 +65,14 @@ class UserTaskView(APIView):
         user = User.objects.filter(pk=pk).first()
         if user is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        completed = request.query_params.get('completed')
+
+        if completed:
+            completed = completed.lower() == 'true'
+            tasks = Task.objects.filter(completed=completed)
+            serializer = TaskSerializer(tasks, many=True)
+            return Response(serializer.data)
 
         tasks = user.assigned_to.all()
         serializer = TaskSerializer(tasks, many=True)
