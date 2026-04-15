@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+@import './base.css';
+@import "tailwindcss";
+@import "tailwindcss";
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-fade-in-down { animation: fadeInDown 0.6s ease both; }
+.animate-fade-in-down-1 { animation: fadeInDown 0.6s ease 0.1s both; }
+.animate-fade-in-down-2 { animation: fadeInDown 0.6s ease 0.2s both; }
+.animate-fade-in-down-3 { animation: fadeInDown 0.6s ease 0.3s both; }
+.animate-fade-in-down-4 { animation: fadeInDown 0.6s ease 0.4s both; }
+.animate-fade-in-up { animation: fadeInUp 0.8s ease 0.5s both; }
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-float-delayed { animation: float 4s ease-in-out 2s infinite; }
+.animate-pulse-dot { animation: pulse-dot 2s infinite; }
+
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
