@@ -10,7 +10,7 @@ COPY pyproject.toml uv.lock* ./
 
 RUN uv sync --no-dev --no-editable
 
-COPY . .
+COPY .. .
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1

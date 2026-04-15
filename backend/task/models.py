@@ -1,16 +1,24 @@
 from django.db import models
 from user.models import User
-from category.models import Category
 
 class Task(models.Model):
+    class Category(models.TextChoices):
+        TODO = 'TODO', 'To do'
+        IN_PROGRESS = 'IN_PROGRESS', 'In Progress'
+        DONE = 'DONE', 'Done'
+
+
     title = models.CharField(max_length=200)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     due_to = models.DateField()
     completed = models.BooleanField(default=False)
+    category = models.CharField(
+        max_length=20,
+        choices=Category.choices,
+        default=Category.TODO,
+    )
 
     assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned_to')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category',
-                                 null=True, blank=True)
 
     def __str__(self):
         return (f"title: {self.title}\n"

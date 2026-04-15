@@ -1,4 +1,6 @@
 <script setup>
+defineEmits(['edit-task'])
+import TaskCard from "@/components/TaskCard.vue";
 const props = defineProps({
   columns: Array
 })
@@ -29,34 +31,12 @@ const props = defineProps({
           [&::-webkit-scrollbar-thumb]:bg-white/10
           [&::-webkit-scrollbar-thumb]:rounded-full">
 
-          <div v-for="task in col.tasks" :key="task.id"
-            class="group bg-[#111622]/90 border border-white/5 p-5 rounded-xl hover:border-indigo-500/30 transition-all cursor-pointer shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 flex flex-col gap-4">
-
-            <h3 class="text-[16px] font-bold text-slate-100 leading-tight group-hover:text-indigo-400 transition-colors">
-              {{ task.title }}
-            </h3>
-
-            <p v-if="task.description" class="text-xs text-slate-400 line-clamp-3 leading-relaxed border-l-2 border-indigo-500/20 pl-3">
-              {{ task.description }}
-            </p>
-
-            <div class="mt-2 grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
-              <div class="flex flex-col gap-1">
-                <span class="text-[9px] uppercase tracking-widest text-slate-500 font-black">Assignee</span>
-                <span class="text-[11px] text-slate-300 font-medium truncate">
-                  {{ task.assigned_to_details.username || 'User ' + task.assigned_to_details.username }}
-                </span>
-              </div>
-
-              <div class="flex flex-col gap-1">
-                <span class="text-[9px] uppercase tracking-widest text-slate-500 font-black">Due Date</span>
-                <span class="text-[11px] text-slate-300 font-medium">
-                  {{ task.due_to }}
-                </span>
-              </div>
-            </div>
-
-          </div>
+          <TaskCard
+            v-for="task in col.tasks"
+            :key="task.id"
+            :task="task"
+            @edit-task="$emit('edit-task', $event)"
+          />
 
           <div v-if="col.tasks.length === 0" class="h-24 border-2 border-dashed border-white/5 rounded-xl flex items-center justify-center text-slate-600 text-[10px] font-black uppercase tracking-widest">
             No Tasks

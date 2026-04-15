@@ -5,8 +5,11 @@ import TopHeader from '@/components/TopHeader.vue'
 import KanbanBoard from '@/components/KanbanBoard.vue'
 import AddTask from "@/components/AddTask.vue"
 import Task from "@/api/Task.js";
+import EditTask from "@/components/EditTask.vue";
 
 const isAddTaskOpen = ref(false)
+const isEditModalOpen = ref(false)
+const selectedTask = ref(null)
 
 const kanbanCols = ref([
   { id: 'todo', title: 'To Do', color: '#6b7280', tasks: [] },
@@ -34,7 +37,7 @@ const fetchAllData = async () => {
       if (task.completed) {
         kanbanCols.value[2].tasks.push(formattedTask)
       } else {
-        if (task.category_details.name == "TO DO"){
+        if (task.category == "TODO"){
           kanbanCols.value[0].tasks.push(formattedTask)
         }
         else{
@@ -43,7 +46,7 @@ const fetchAllData = async () => {
       }
     })
   } catch (err) {
-    console.error("Błąd pobierania zadań:", err)
+    console.error(err)
   }
 }
 
@@ -67,6 +70,16 @@ const handleNewTask = async () => {
     console.error(err)
   }
 }
+
+const openEditModal = (task) => {
+  selectedTask.value = task
+  isEditModalOpen.value = true
+}
+
+const closeEditModal = () => {
+  isEditModalOpen.value = false
+  selectedTask.value = null
+}
 </script>
 
 <template>
@@ -74,9 +87,16 @@ const handleNewTask = async () => {
     <Sidebar />
     <main class="flex-1 flex flex-col min-w-0 bg-[#080b12] relative">
       <TopHeader @open-add-task="isAddTaskOpen = true" />
-      <KanbanBoard :columns="kanbanCols" />
+      <KanbanBoard :columns="kanbanCols" @edit-task="openEditModal"/>
     </main>
     <AddTask :is-open="isAddTaskOpen" @close="isAddTaskOpen = false" @submit="handleNewTask"
              @refresh = "handleNewTask"/>
+
+    <EditTask
+      v-if="isEditModalOpen"
+      :task="selectedTask"
+      @close="closeEditModal"
+      @submit="fetchAllData"
+    />
   </div>
 </template>

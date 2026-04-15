@@ -1,7 +1,4 @@
-from django.shortcuts import render
-from django.http import HttpResponse
 from rest_framework import status
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import TaskSerializer
@@ -13,7 +10,7 @@ from task.models import Task
 
 class TaskListView(APIView):
     def get(self, request):
-        tasks = Task.objects.all()
+        tasks = Task.objects.select_related('assigned_to').all()
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
 
@@ -33,6 +30,7 @@ class TaskDetailView(APIView):
 
     def patch(self, request, pk):
         task = self._get_task(pk)
+        print(request.data)
         serializer = TaskSerializer(task, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()

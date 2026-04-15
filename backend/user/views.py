@@ -1,9 +1,6 @@
-from django.http import HttpResponse
-from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
 from task.models import Task
 from .models import User
 from task.serializers import TaskSerializer
@@ -15,7 +12,7 @@ from user.serializers import UserSerializer
 
 class UserListView(APIView):
     def get(self, request):
-        users = User.objects.all()
+        users = User.objects.values('id', 'username', 'email')
         if not users.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = UserSerializer(users, many=True)
