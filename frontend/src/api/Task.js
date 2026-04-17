@@ -12,6 +12,10 @@ class Task{
   updateTask(data, id){
     return api.patch(`tasks/${id}`, data)
   }
+
+  deleteTask(id){
+    return api.delete(`tasks/${id}`)
+  }
 }
 
 export default new Task()

@@ -1,9 +1,40 @@
 <script setup>
-defineEmits(['edit-task'])
+import Task from "@/api/Task.js";
+import draggableComponent from "vuedraggable";
 import TaskCard from "@/components/TaskCard.vue";
+
+const emit = defineEmits(['edit-task', 'refresh-data'])
 const props = defineProps({
   columns: Array
 })
+
+const onDragChange = async (evt, columnId) => {
+  if (evt.added) {
+    const movedTask = evt.added.element
+
+    let backendCategory = ""
+    let isCompleted = false
+
+    if (columnId === 'todo') {
+      backendCategory = "TODO"
+    } else if (columnId === 'inprogress') {
+      backendCategory = "IN_PROGRESS"
+    } else if (columnId === 'done') {
+      backendCategory = "DONE"
+      isCompleted = true
+    }
+    try {
+      const updateData = {
+        category: backendCategory,
+        completed: isCompleted
+      }
+      await Task.updateTask(updateData, movedTask.id)
+      emit('refresh-data')
+    } catch (err) {
+      console.error(err)
+    }
+  }
+}
 </script>
 
 <template>
@@ -14,8 +45,7 @@ const props = defineProps({
     [&::-webkit-scrollbar-thumb]:rounded-full">
 
     <div class="flex gap-8 h-full min-w-max">
-
-      <div v-for="col in columns" :key="col.title" class="w-[350px] flex flex-col gap-6 shrink-0">
+      <div v-for="col in columns" :key="col.id" class="w-[350px] flex flex-col gap-6 shrink-0 relative">
 
         <div class="flex items-center justify-between px-2">
           <div class="flex items-center gap-3">
@@ -25,24 +55,31 @@ const props = defineProps({
           </div>
         </div>
 
-        <div class="flex-1 flex flex-col gap-4 overflow-y-auto pr-2
-          [&::-webkit-scrollbar]:w-1
-          [&::-webkit-scrollbar-track]:bg-transparent
-          [&::-webkit-scrollbar-thumb]:bg-white/10
-          [&::-webkit-scrollbar-thumb]:rounded-full">
+        <draggableComponent
+          v-model="col.tasks"
+          group="tasks"
+          item-key="id"
+          :animation="200"
+          ghost-class="opacity-20"
+          @change="onDragChange($event, col.id)"
+          class="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 pb-20
+            [&::-webkit-scrollbar]:w-1
+            [&::-webkit-scrollbar-track]:bg-transparent
+            [&::-webkit-scrollbar-thumb]:bg-white/10
+            [&::-webkit-scrollbar-thumb]:rounded-full"
+        >
+          <template #item="{ element }">
+            <TaskCard
+              :task="element"
+              @edit-task="$emit('edit-task', $event)"
+            />
+          </template>
+        </draggableComponent>
 
-          <TaskCard
-            v-for="task in col.tasks"
-            :key="task.id"
-            :task="task"
-            @edit-task="$emit('edit-task', $event)"
-          />
-
-          <div v-if="col.tasks.length === 0" class="h-24 border-2 border-dashed border-white/5 rounded-xl flex items-center justify-center text-slate-600 text-[10px] font-black uppercase tracking-widest">
-            No Tasks
-          </div>
-
+        <div v-if="col.tasks.length === 0" class="absolute top-[80px] left-0 w-full h-24 border-2 border-dashed border-white/5 rounded-xl flex items-center justify-center text-slate-600 text-[10px] font-black uppercase tracking-widest -z-10">
+          No Tasks
         </div>
+
       </div>
     </div>
   </section>

@@ -9,6 +9,10 @@ class TaskSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if validated_data.get('completed', False) is True:
             validated_data['category'] = Task.Category.DONE
+        elif validated_data.get('category', "TODO") == "DONE":
+            validated_data['completed'] = True
+        else:
+            validated_data['completed'] = False
         return super().update(instance, validated_data)
 
     class Meta:

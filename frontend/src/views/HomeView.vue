@@ -1,15 +1,21 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import {ref, onMounted, computed, watch} from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 import TopHeader from '@/components/TopHeader.vue'
 import KanbanBoard from '@/components/KanbanBoard.vue'
 import AddTask from "@/components/AddTask.vue"
 import Task from "@/api/Task.js";
 import EditTask from "@/components/EditTask.vue";
+import AddUser from "@/components/AddUser.vue";
+import UserList from "@/components/UserList.vue";
 
 const isAddTaskOpen = ref(false)
+const isAddUserOpen = ref(false)
 const isEditModalOpen = ref(false)
 const selectedTask = ref(null)
+const activeView = ref(localStorage.getItem('activeTab') || 'board')
+const usersListKey = ref(0)
+
 
 const kanbanCols = ref([
   { id: 'todo', title: 'To Do', color: '#6b7280', tasks: [] },
@@ -30,9 +36,8 @@ const fetchAllData = async () => {
         tag: task.category || 'General',
         tagClass: getCategoryStyle(task.category),
         avatar: task.assigned_to?.[0] || '?',
-        avatarColor: '#6366f1'
+        avatarColor: '#5659ec'
       }
-      console.log(task.category)
 
       if (task.completed) {
         kanbanCols.value[2].tasks.push(formattedTask)
@@ -44,11 +49,16 @@ const fetchAllData = async () => {
           kanbanCols.value[1].tasks.push(formattedTask)
         }
       }
+      usersListKey.value++
     })
   } catch (err) {
     console.error(err)
   }
 }
+
+const totalTasks = computed(() => {
+  return kanbanCols.value.reduce((total, col) => total + col.tasks.length, 0)
+})
 
 const getCategoryStyle = (catId) => {
   const styles = {
@@ -59,11 +69,15 @@ const getCategoryStyle = (catId) => {
   return styles[catId] || 'bg-slate-400/10 text-slate-400 border border-slate-400/20'
 }
 
+watch(activeView, (newTab) => {
+  localStorage.setItem('activeTab', newTab)
+})
+
 onMounted(() => {
   fetchAllData()
 })
 
-const handleNewTask = async () => {
+const handleNew = async () => {
   try {
     await fetchAllData()
   } catch (err) {
@@ -84,13 +98,16 @@ const closeEditModal = () => {
 
 <template>
   <div class="h-screen w-full bg-[#080b12] text-slate-200 overflow-hidden font-sans flex select-none">
-    <Sidebar />
+    <Sidebar :active-tab="activeView" @change-tab="activeView = $event"/>
     <main class="flex-1 flex flex-col min-w-0 bg-[#080b12] relative">
-      <TopHeader @open-add-task="isAddTaskOpen = true" />
-      <KanbanBoard :columns="kanbanCols" @edit-task="openEditModal"/>
+      <TopHeader :total-tasks="totalTasks" @open-add-user="isAddUserOpen = true" @open-add-task="isAddTaskOpen = true "/>
+      <KanbanBoard v-if="activeView === 'board'" :columns="kanbanCols" @edit-task="openEditModal" @refresh-data="fetchAllData"/>
+      <UserList v-if="activeView === 'users'" :refresh-signal="usersListKey" @refresh="fetchAllData"/>
     </main>
-    <AddTask :is-open="isAddTaskOpen" @close="isAddTaskOpen = false" @submit="handleNewTask"
-             @refresh = "handleNewTask"/>
+    <AddTask :is-open="isAddTaskOpen" @close="isAddTaskOpen = false" @submit="handleNew"
+             @refresh = "handleNew"/>
+
+    <AddUser :is-open="isAddUserOpen" @close="isAddUserOpen = false" @refresh="handleNew"/>
 
     <EditTask
       v-if="isEditModalOpen"
