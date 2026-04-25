@@ -1,7 +1,9 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from .serializers import TaskSerializer
+from tokens.authentication import BearerAuthentication
 from task.models import Task
 
 
@@ -9,6 +11,8 @@ from task.models import Task
 
 
 class TaskListView(APIView):
+    authentication_classes = [BearerAuthentication]
+
     def get(self, request):
         tasks = Task.objects.select_related('assigned_to').all()
         serializer = TaskSerializer(tasks, many=True)
@@ -23,6 +27,8 @@ class TaskListView(APIView):
 
 
 class TaskDetailView(APIView):
+    authentication_classes = [BearerAuthentication]
+
     def get(self, request, pk):
         task = Task.objects.get(pk=pk)
         serializer = TaskSerializer(task)

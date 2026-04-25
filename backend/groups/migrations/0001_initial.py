@@ -8,17 +8,17 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ('user', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='User',
+            name='Group',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('username', models.CharField(max_length=200, unique=True)),
-                ('email', models.EmailField(max_length=254, unique=True)),
-                ('password', models.CharField(max_length=255)),
-                ('is_active', models.BooleanField(default=True)),
+                ('name', models.CharField(max_length=100)),
+                ('description', models.TextField()),
+                ('members', models.ManyToManyField(blank=True, related_name='members', to='user.user')),
             ],
         ),
     ]
