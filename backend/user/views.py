@@ -3,6 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from task.models import Task
 from tokens.models import Token
 from tokens.authentication import BearerAuthentication
@@ -32,6 +33,7 @@ class UserListView(APIView):
 
 class UserDetailView(APIView):
     authentication_classes = [BearerAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
@@ -63,6 +65,7 @@ class UserDetailView(APIView):
 
 class UserTaskView(APIView):
     authentication_classes = [BearerAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user

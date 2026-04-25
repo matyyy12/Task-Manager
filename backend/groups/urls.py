@@ -1,5 +1,7 @@
-from django.urls import path, include
+from django.urls import path
+import views
 
 urlpatterns = [
-
+    path('', views.GroupListView.as_view(), name='group-list'),
+    path('<int:pk>', views.GroupDetailView.as_view(), name='group-detail'),
 ]
