@@ -7,7 +7,7 @@ from task.models import Task
 
 class Group(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
 
     members = models.ManyToManyField(User, related_name='members', blank=True)
 

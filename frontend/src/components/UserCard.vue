@@ -30,7 +30,7 @@ const cancelEdit = () => {
 
 const deleteUser = async () => {
   try{
-    await User.deleteUser(props.user.id)
+    await User.deleteUser()
     emit('refresh')
   }
   catch (err){
@@ -40,7 +40,7 @@ const deleteUser = async () => {
 
 const saveUser = async () => {
   try {
-    await User.updateUser(editData, props.user.id)
+    await User.updateUser(editData)
     isEditing.value = false
     emit('refresh')
   } catch (err) {

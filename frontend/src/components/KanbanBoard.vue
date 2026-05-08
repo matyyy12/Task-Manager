@@ -1,11 +1,72 @@
 <script setup>
+import { ref, onMounted, watch } from 'vue';
 import Task from "@/api/Task.js";
 import draggableComponent from "vuedraggable";
 import TaskCard from "@/components/TaskCard.vue";
 
-const emit = defineEmits(['edit-task', 'refresh-data'])
+const emit = defineEmits(['edit-task'])
+
 const props = defineProps({
-  columns: Array
+  groupId: {
+    type: [String, Number],
+    required: true
+  }
+})
+
+const columns = ref([
+  { id: 'todo', title: 'To Do', color: '#6b7280', tasks: [] },
+  { id: 'inprogress', title: 'In Progress', color: '#f59e0b', tasks: [] },
+  { id: 'done', title: 'Done', color: '#10b981', tasks: [] }
+])
+
+const getCategoryStyle = (catId) => {
+  const styles = {
+    1: 'bg-blue-400/10 text-blue-400 border border-blue-400/20',
+    2: 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/20',
+    3: 'bg-violet-400/10 text-violet-400 border border-violet-400/20',
+  }
+  return styles[catId] || 'bg-slate-400/10 text-slate-400 border border-slate-400/20'
+}
+
+const fetchTasks = async () => {
+  if (!props.groupId) return;
+
+  try {
+    const response = await Task.getAllTasks({ group: props.groupId })
+    const allTasks = response.data
+
+    columns.value.forEach(col => col.tasks = [])
+
+    allTasks.forEach(task => {
+      const formattedTask = {
+        ...task,
+        tag: task.category || 'General',
+        tagClass: getCategoryStyle(task.category),
+        avatar: task.assigned_to?.[0] || '?',
+        avatarColor: '#5659ec'
+      }
+
+      if (task.completed) {
+        columns.value[2].tasks.push(formattedTask)
+      } else {
+        if (task.category == "TODO"){
+          columns.value[0].tasks.push(formattedTask)
+        } else {
+          columns.value[1].tasks.push(formattedTask)
+        }
+      }
+    })
+  } catch (err) {
+    console.error('Błąd pobierania zadań:', err)
+  }
+}
+
+onMounted(() => {
+  fetchTasks()
+})
+
+watch(() => props.groupId, () => {
+  fetchTasks()
 })
 
 const onDragChange = async (evt, columnId) => {
@@ -29,12 +90,17 @@ const onDragChange = async (evt, columnId) => {
         completed: isCompleted
       }
       await Task.updateTask(updateData, movedTask.id)
-      emit('refresh-data')
+
+      await fetchTasks()
     } catch (err) {
       console.error(err)
     }
   }
 }
+
+defineExpose({
+  fetchTasks
+})
 </script>
 
 <template>

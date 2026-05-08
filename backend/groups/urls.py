@@ -1,5 +1,5 @@
 from django.urls import path
-import views
+from groups import views
 
 urlpatterns = [
     path('', views.GroupListView.as_view(), name='group-list'),

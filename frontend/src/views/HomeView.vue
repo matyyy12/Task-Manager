@@ -3,8 +3,10 @@ import {ref, onMounted, computed, watch} from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 import TopHeader from '@/components/TopHeader.vue'
 import KanbanBoard from '@/components/KanbanBoard.vue'
+import GroupList from '@/components/GroupList.vue'
 import AddTask from "@/components/AddTask.vue"
 import Task from "@/api/Task.js";
+import Groups from "@/api/Groups.js";
 import EditTask from "@/components/EditTask.vue";
 import AddUser from "@/components/AddUser.vue";
 import UserList from "@/components/UserList.vue";
@@ -16,6 +18,7 @@ const selectedTask = ref(null)
 const activeView = ref(localStorage.getItem('activeTab') || 'board')
 const usersListKey = ref(0)
 
+const userGroups = ref([])
 
 const kanbanCols = ref([
   { id: 'todo', title: 'To Do', color: '#6b7280', tasks: [] },
@@ -25,8 +28,11 @@ const kanbanCols = ref([
 
 const fetchAllData = async () => {
   try {
-    const response = await Task.getAllTasks()
-    const allTasks = response.data
+    const groupsResponse = await Groups.getAll()
+    userGroups.value = groupsResponse.data
+
+    const tasksResponse = await Task.getAllTasks()
+    const allTasks = tasksResponse.data
 
     kanbanCols.value.forEach(col => col.tasks = [])
 
@@ -49,10 +55,10 @@ const fetchAllData = async () => {
           kanbanCols.value[1].tasks.push(formattedTask)
         }
       }
-      usersListKey.value++
     })
+    usersListKey.value++
   } catch (err) {
-    console.error(err)
+    console.error('Błąd pobierania danych:', err)
   }
 }
 
@@ -101,12 +107,24 @@ const closeEditModal = () => {
     <Sidebar :active-tab="activeView" @change-tab="activeView = $event"/>
     <main class="flex-1 flex flex-col min-w-0 bg-[#080b12] relative">
       <TopHeader :total-tasks="totalTasks" @open-add-user="isAddUserOpen = true" @open-add-task="isAddTaskOpen = true "/>
-      <KanbanBoard v-if="activeView === 'board'" :columns="kanbanCols" @edit-task="openEditModal" @refresh-data="fetchAllData"/>
+
+      <GroupList
+        v-if="activeView === 'board' || activeView === 'groups'"
+        :groups="userGroups"
+      />
+
+      <KanbanBoard
+        v-if="activeView === 'board'"
+        :columns="kanbanCols"
+        :group-id="null"
+        @edit-task="openEditModal"
+        @refresh-data="fetchAllData"
+      />
+
       <UserList v-if="activeView === 'users'" :refresh-signal="usersListKey" @refresh="fetchAllData"/>
     </main>
-    <AddTask :is-open="isAddTaskOpen" @close="isAddTaskOpen = false" @submit="handleNew"
-             @refresh = "handleNew"/>
 
+    <AddTask :is-open="isAddTaskOpen" @close="isAddTaskOpen = false" @submit="handleNew" @refresh="handleNew"/>
     <AddUser :is-open="isAddUserOpen" @close="isAddUserOpen = false" @refresh="handleNew"/>
 
     <EditTask
