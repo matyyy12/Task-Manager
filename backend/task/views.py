@@ -41,7 +41,7 @@ class TaskListView(APIView):
             if serializer.is_valid():
                 user = request.user
                 group = request.data['group']
-                if not user.groups.filter(name=group).exists():
+                if not user.member.filter(pk=group).exists():
                     return Response(status=status.HTTP_400_BAD_REQUEST)
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)

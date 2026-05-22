@@ -4,11 +4,11 @@ import Task from "@/api/Task.js";
 import draggableComponent from "vuedraggable";
 import TaskCard from "@/components/TaskCard.vue";
 
-const emit = defineEmits(['edit-task'])
+const emit = defineEmits(['edit-task', 'update-tasks-count'])
 
 const props = defineProps({
   groupId: {
-    type: [String, Number],
+    type: [String, Number, null],
     required: true
   }
 })
@@ -32,12 +32,14 @@ const fetchTasks = async () => {
   if (!props.groupId) return;
 
   try {
-    const response = await Task.getAllTasks({ group: props.groupId })
+    const response = await Task.getAllTasks(props.groupId)
     const allTasks = response.data
 
     columns.value.forEach(col => col.tasks = [])
+    let taskCount = 0;
 
     allTasks.forEach(task => {
+      taskCount++;
       const formattedTask = {
         ...task,
         tag: task.category || 'General',
@@ -56,6 +58,7 @@ const fetchTasks = async () => {
         }
       }
     })
+    emit('update-tasks-count', taskCount)
   } catch (err) {
     console.error('Błąd pobierania zadań:', err)
   }
@@ -72,7 +75,6 @@ watch(() => props.groupId, () => {
 const onDragChange = async (evt, columnId) => {
   if (evt.added) {
     const movedTask = evt.added.element
-
     let backendCategory = ""
     let isCompleted = false
 
@@ -90,7 +92,6 @@ const onDragChange = async (evt, columnId) => {
         completed: isCompleted
       }
       await Task.updateTask(updateData, movedTask.id)
-
       await fetchTasks()
     } catch (err) {
       console.error(err)

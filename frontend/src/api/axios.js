@@ -40,7 +40,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 403 && !originalRequest._retry) {
 
       if (isRefreshing) {
         return new Promise(function(resolve, reject) {
@@ -61,12 +61,12 @@ api.interceptors.response.use(
       if (!refreshToken) {
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
-        window.location.reload()
+        window.location.href = '/login'
         return Promise.reject(error)
       }
 
       try {
-        const response = await axios.post('http://localhost:8080/api/refresh', {
+        const response = await axios.post('http://localhost:8080/api/tokens/refresh', {
           refresh_token: refreshToken
         })
 
@@ -85,7 +85,7 @@ api.interceptors.response.use(
 
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
-        window.location.reload()
+        window.location.href = '/login'
 
         return Promise.reject(refreshError)
       } finally {

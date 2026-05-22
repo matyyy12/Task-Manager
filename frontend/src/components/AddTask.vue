@@ -1,10 +1,11 @@
 <script setup>
 import { reactive, onMounted, ref, watch } from 'vue'
-import User from "@/api/User.js"
 import Task from "@/api/Task.js"
+import Groups from "@/api/Groups.js";
 
 const props = defineProps({
-  isOpen: Boolean
+  isOpen: Boolean,
+  groupId: [Number, String, null]
 })
 
 const emit = defineEmits(['close', 'refresh'])
@@ -40,8 +41,8 @@ watch(() => formData.completed, (isCompleted) => {
 
 onMounted(async () => {
   try {
-    const response = await User.getAllUsers()
-    users.value = response.data
+    const response = await Groups.getDetails(props.groupId)
+    users.value = response.data.members_details || []
   } catch (err) {
     console.error(err)
   }
@@ -50,10 +51,11 @@ onMounted(async () => {
 watch(() => props.isOpen, async (newVal) => {
   if (newVal) {
     try {
-      const response = await User.getAllUsers()
-      users.value = response.data
+      const response = await Groups.getDetails(props.groupId)
+      users.value = response.data.members_details || []
     } catch (err) {
       console.error(err)
+      users.value = []
     }
   }
 })
@@ -79,7 +81,11 @@ const addTask = async () => {
     return
   }
   try {
-    await Task.createTask({ ...formData })
+    const payload = { ...formData }
+    if (props.groupId) {
+      payload.group = props.groupId
+    }
+    await Task.createTask(payload)
     emit('refresh')
     closeForm()
   } catch (err) {
