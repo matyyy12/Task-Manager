@@ -23,6 +23,7 @@ class TaskListView(APIView):
         if user_pk is not None:
             filters['user'] = user_pk
 
+
         if group_pk is not None:
             filters['group'] = group_pk
         else:
