@@ -29,8 +29,6 @@ const getCategoryStyle = (catId) => {
 }
 
 const fetchTasks = async () => {
-  if (!props.groupId) return;
-
   try {
     const response = await Task.getAllTasks(props.groupId)
     const allTasks = response.data

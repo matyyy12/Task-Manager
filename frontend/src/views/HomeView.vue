@@ -1,13 +1,13 @@
 <script setup>
-import {ref, onMounted, watch, computed} from 'vue' // usunęliśmy computed
+import {ref, onMounted, watch, computed} from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 import TopHeader from '@/components/TopHeader.vue'
 import KanbanBoard from '@/components/KanbanBoard.vue'
 import GroupList from '@/components/GroupList.vue'
 import AddTask from "@/components/AddTask.vue"
 import Groups from "@/api/Groups.js";
+import AddGroup from "@/components/AddGroup.vue";
 import EditTask from "@/components/EditTask.vue";
-import AddUser from "@/components/AddUser.vue";
 import UserList from "@/components/UserList.vue";
 
 const isAddTaskOpen = ref(false)
@@ -28,22 +28,27 @@ const getInitialGroupId = () => {
 const selectedGroupId = ref(getInitialGroupId())
 const kanbanBoardRef = ref(null)
 const totalTasks = ref(0)
+const isAddGroupOpen = ref(false)
 
+
+const handleChangeTab = (newTab) => {
+  activeView.value = newTab
+  localStorage.setItem('activeTab', newTab)
+  selectedGroupId.value = null
+  localStorage.removeItem('selectedGroupId')
+  if (newTab !== 'board') {
+    totalTasks.value = 0
+  }
+}
 
 const handleOpenGroup = (groupId) => {
   selectedGroupId.value = groupId
   localStorage.setItem('selectedGroupId', groupId)
   activeView.value = 'board'
+  localStorage.setItem('activeTab', 'board')
 }
 
-watch(activeView, (newTab) => {
-  localStorage.setItem('activeTab', newTab)
-  if (newTab !== 'board') {
-    selectedGroupId.value = null
-    localStorage.removeItem('selectedGroupId')
-    totalTasks.value = 0
-  }
-})
+
 
 const fetchAllGroups = async () => {
   try {
@@ -55,6 +60,10 @@ const fetchAllGroups = async () => {
 }
 
 const currentGroupName = computed(() => {
+  if (activeView.value === 'my-tasks') {
+    return 'My Tasks'
+  }
+
   if (activeView.value !== 'board' || !selectedGroupId.value) {
     return 'Task Manager'
   }
@@ -89,12 +98,15 @@ const closeEditModal = () => {
 
 <template>
   <div class="h-screen w-full bg-[#080b12] text-slate-200 overflow-hidden font-sans flex select-none">
-    <Sidebar :active-tab="activeView" @change-tab="activeView = $event"/>
+    <Sidebar :active-tab="activeView" @change-tab="handleChangeTab" />
     <main class="flex-1 flex flex-col min-w-0 bg-[#080b12] relative">
       <TopHeader
         :total-tasks="totalTasks"
         :group-name="currentGroupName"
+        :show-add-task="activeView === 'board'"
+        :show-add-group="activeView === 'groups'"
         @open-add-task="isAddTaskOpen = true"
+        @open-add-group="isAddGroupOpen = true"
       />
 
       <GroupList
@@ -104,29 +116,34 @@ const closeEditModal = () => {
       />
 
       <KanbanBoard
-        v-if="activeView === 'board'"
+        v-if="activeView === 'board' || activeView === 'my-tasks'"
         ref="kanbanBoardRef"
-        :group-id="selectedGroupId || ''"
+        :group-id="activeView === 'my-tasks' ? null : selectedGroupId"
         @edit-task="openEditModal"
         @update-tasks-count="totalTasks = $event"
       />
 
-      <UserList v-if="activeView === 'users'" :refresh-signal="usersListKey" @refresh="fetchAllTasks"/>
-    </main>
+      <UserList v-if="activeView === 'users'" :refresh-signal="usersListKey" @refresh="handleNew"/>    </main>
 
-    <AddTask
-      :is-open="isAddTaskOpen"
-      :group-id="selectedGroupId"
-      @close="isAddTaskOpen = false"
-      @submit="handleNew"
-      @refresh="handleNew"
-    />
+      <AddTask
+        :is-open="isAddTaskOpen"
+        :group-id="selectedGroupId"
+        @close="isAddTaskOpen = false"
+        @submit="handleNew"
+        @refresh="handleNew"
+      />
 
-    <EditTask
-      v-if="isEditModalOpen"
-      :task="selectedTask"
-      @close="closeEditModal"
-      @submit="fetchAllTasks"
-    />
+      <AddGroup
+        :is-open="isAddGroupOpen"
+        @close="isAddGroupOpen = false"
+        @refresh="fetchAllGroups"
+      />
+
+      <EditTask
+        v-if="isEditModalOpen"
+        :task="selectedTask"
+        @close="closeEditModal"
+        @submit="handleNew"
+      />
   </div>
 </template>

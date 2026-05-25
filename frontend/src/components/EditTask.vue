@@ -1,8 +1,7 @@
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue'
 import Task from "@/api/Task.js";
-import User from "@/api/User.js";
-
+import Groups from "@/api/Groups.js";
 
 const props = defineProps({
   task: { type: Object, required: true }
@@ -49,11 +48,14 @@ watch(() => formData.completed, (isCompleted) => {
 })
 
 onMounted(async () => {
+  if (!props.task?.group) return;
+
   try {
-    const usersResponse = await User.getAllUsers()
-    users.value = usersResponse.data
+    const response = await Groups.getDetails(props.task.group)
+    users.value = response.data.members_details || []
   } catch (err) {
     console.error(err)
+    users.value = []
   }
 })
 
@@ -115,7 +117,7 @@ const deleteTask = async () => {
                  class="w-full bg-[#080b12] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer flex items-center justify-between"
                  :class="formData.assigned_to ? 'text-slate-200' : 'text-slate-500'">
               <span class="truncate pr-2">
-                {{ users.find(u => u.id === formData.assigned_to)?.username || 'Select user...' }}
+                {{ users?.find(u => u.id === formData.assigned_to)?.username || 'Select user...' }}
               </span>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500 transition-transform duration-200 shrink-0" :class="{'rotate-180': isAssigneeOpen}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -125,7 +127,7 @@ const deleteTask = async () => {
             <div v-if="isAssigneeOpen"
                  class="absolute z-50 w-full mt-2 bg-[#1a2130] border border-white/10 rounded-xl shadow-2xl max-h-48 overflow-y-auto py-1
                         [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
-              <div v-for="user in users" :key="user.id"
+              <div v-for="user in (users || [])" :key="user.id"
                    @click="formData.assigned_to = user.id; isAssigneeOpen = false"
                    class="px-4 py-2.5 text-sm cursor-pointer transition-colors flex items-center gap-2"
                    :class="formData.assigned_to === user.id ? 'bg-indigo-600/20 text-indigo-400 font-bold' : 'text-slate-200 hover:bg-white/5'">

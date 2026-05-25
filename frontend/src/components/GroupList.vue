@@ -35,9 +35,9 @@ defineEmits(['open-group'])
           {{ group.description || 'No additional description for this group.' }}
         </p>
 
-        <div class="mt-4 pt-4 border-t border-slate-800/50 text-xs text-slate-500 flex justify-between items-center">
+       <div class="mt-4 pt-4 border-t border-slate-800/50 text-xs text-slate-500 flex justify-between items-center">
           <span>ID: {{ group.id }}</span>
-          <button @click.stop="console.log('Otwieram szczegóły...')" class="text-slate-300 hover:text-white transition-colors font-medium">
+          <button @click.stop="$emit('open-group', group.id)" class="text-slate-300 hover:text-white transition-colors font-medium">
             View details &rarr;
           </button>
         </div>

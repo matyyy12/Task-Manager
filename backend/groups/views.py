@@ -22,7 +22,8 @@ class GroupListView(APIView):
     def post(self, request):
         serializer = GroupSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            group = serializer.save()
+            group.members.add(request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

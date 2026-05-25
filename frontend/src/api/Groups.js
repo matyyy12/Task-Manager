@@ -8,6 +8,10 @@ class Groups {
   getDetails(groupId){
     return api.get(`groups/${groupId}`)
   }
+
+  createGroup(data){
+    return api.post('groups/', data)
+  }
 }
 
 export default new Groups()

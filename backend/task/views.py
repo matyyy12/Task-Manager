@@ -18,15 +18,10 @@ class TaskListView(APIView):
         filters = {}
         group_pk = request.query_params.get('group', None)
         completed = request.query_params.get('completed', None)
-        user_pk = request.query_params.get('user', None)
-
-        if user_pk is not None:
-            filters['user'] = user_pk
+        filters['assigned_to'] = request.user
 
         if group_pk is not None:
             filters['group'] = group_pk
-        else:
-            return Response({'error': 'Please provide a valid group ID'}, status=status.HTTP_400_BAD_REQUEST)
 
         if completed is not None:
             filters['completed'] = completed.lower() == 'true'
