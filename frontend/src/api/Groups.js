@@ -12,6 +12,14 @@ class Groups {
   createGroup(data){
     return api.post('groups/', data)
   }
+
+  createInvitation(groupId) {
+    return api.post(`groups/${groupId}/invitation`)
+  }
+
+  joinByInvitation(token) {
+    return api.get(`groups/invitation/${token}`)
+  }
 }
 
 export default new Groups()

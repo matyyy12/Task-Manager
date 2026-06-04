@@ -1,5 +1,7 @@
+import datetime
+
 from rest_framework import serializers
-from groups.models import Group
+from groups.models import Group, Invitation
 from user.serializers import UserSerializer
 
 
@@ -17,3 +19,10 @@ class GroupMemberSerializer(serializers.ModelSerializer):
         model = Group
         fields = ('id', 'name', 'description', 'members_details')
         read_only_fields = ['id']
+
+
+class InvitationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invitation
+        fields = ("id", "token", "group", "created_by", "expired_at")
+        read_only_fields = ['id', 'token']

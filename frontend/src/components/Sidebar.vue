@@ -10,8 +10,7 @@ const emit = defineEmits(['change-tab'])
 
 const sidebarItems = [
   { id: 'groups', icon: '▦', label: 'Groups' },
-  { id: 'my-tasks', icon: '▤', label: 'My Tasks' },
-  { id: 'users', icon: '◉', label: 'Users' }
+  { id: 'my-tasks', icon: '▤', label: 'My Tasks' }
 ]
 
 </script>

@@ -10,6 +10,10 @@ const props = defineProps({
   groupId: {
     type: [String, Number, null],
     required: true
+  },
+  showGroupName: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -136,6 +140,7 @@ defineExpose({
           <template #item="{ element }">
             <TaskCard
               :task="element"
+              :show-group-name="showGroupName"
               @edit-task="$emit('edit-task', $event)"
             />
           </template>

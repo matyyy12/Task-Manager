@@ -3,6 +3,10 @@ defineProps({
   task: {
     type: Object,
     required: true
+  },
+  showGroupName: {
+    type: Boolean,
+    default: false
   }
 })
 defineEmits(['edit-task'])
@@ -25,6 +29,12 @@ defineEmits(['edit-task'])
     <h3 class="text-[16px] font-bold text-slate-100 leading-tight group-hover:text-indigo-400 transition-colors pr-8">
       {{ task.title }}
     </h3>
+
+    <div v-if="showGroupName && task.group_name" class="inline-flex max-w-full">
+      <span class="max-w-full truncate rounded-lg border border-indigo-400/20 bg-indigo-400/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-indigo-300">
+        {{ task.group_name }}
+      </span>
+    </div>
 
     <p v-if="task.description" class="text-xs text-slate-400 line-clamp-3 leading-relaxed border-l-2 border-indigo-500/20 pl-3">
       {{ task.description }}

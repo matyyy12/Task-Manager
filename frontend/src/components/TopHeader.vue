@@ -15,10 +15,18 @@ defineProps({
   showAddGroup: {
     type: Boolean,
     default: false
+  },
+  showJoinGroup: {
+    type: Boolean,
+    default: false
+  },
+  showInviteGroup: {
+    type: Boolean,
+    default: false
   }
 })
 
-defineEmits(['openAddTask', 'openAddGroup'])
+defineEmits(['openAddTask', 'openAddGroup', 'openJoinGroup', 'openInviteGroup'])
 </script>
 
 <template>
@@ -31,11 +39,27 @@ defineEmits(['openAddTask', 'openAddGroup'])
     <div class="flex items-center gap-4">
 
       <button
+        v-if="showJoinGroup"
+        @click="$emit('openJoinGroup')"
+        class="bg-slate-700 hover:bg-slate-600 text-white px-7 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
+      >
+        Join group
+      </button>
+
+      <button
         v-if="showAddGroup"
         @click="$emit('openAddGroup')"
         class="bg-indigo-600 hover:bg-indigo-500 text-white px-7 py-3 rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
       >
         + Add group
+      </button>
+
+      <button
+        v-if="showInviteGroup"
+        @click="$emit('openInviteGroup')"
+        class="bg-slate-700 hover:bg-slate-600 text-white px-7 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
+      >
+        Invite
       </button>
 
       <button
