@@ -1,10 +1,11 @@
 <script setup>
 import { reactive, onMounted, ref, watch } from 'vue'
-import User from "@/api/User.js"
 import Task from "@/api/Task.js"
+import Groups from "@/api/Groups.js";
 
 const props = defineProps({
-  isOpen: Boolean
+  isOpen: Boolean,
+  groupId: [Number, String, null]
 })
 
 const emit = defineEmits(['close', 'refresh'])
@@ -29,31 +30,44 @@ const formData = reactive({
 })
 
 watch(() => formData.category, (newCategory) => {
-  if (newCategory === 'DONE') formData.completed = true;
-  else if (formData.completed) formData.completed = false;
+  if (newCategory === 'DONE') {
+    formData.completed = true
+  } else if (formData.completed) {
+    formData.completed = false
+  }
 })
 
 watch(() => formData.completed, (isCompleted) => {
-  if (isCompleted && formData.category !== 'DONE') formData.category = 'DONE';
-  else if (!isCompleted && formData.category === 'DONE') formData.category = 'TODO';
+  if (isCompleted) {
+    if (formData.category !== 'DONE') {
+      formData.category = 'DONE'
+    }
+  } else {
+    if (formData.category === 'DONE') {
+      formData.category = 'TODO'
+    }
+  }
 })
 
 onMounted(async () => {
+  if (!props.groupId) return
+
   try {
-    const response = await User.getAllUsers()
-    users.value = response.data
+    const response = await Groups.getDetails(props.groupId)
+    users.value = response.data.members_details || []
   } catch (err) {
     console.error(err)
   }
 })
 
 watch(() => props.isOpen, async (newVal) => {
-  if (newVal) {
+  if (newVal && props.groupId) {
     try {
-      const response = await User.getAllUsers()
-      users.value = response.data
+      const response = await Groups.getDetails(props.groupId)
+      users.value = response.data.members_details || []
     } catch (err) {
       console.error(err)
+      users.value = []
     }
   }
 })
@@ -79,7 +93,11 @@ const addTask = async () => {
     return
   }
   try {
-    await Task.createTask({ ...formData })
+    const payload = { ...formData }
+    if (props.groupId) {
+      payload.group = props.groupId
+    }
+    await Task.createTask(payload)
     emit('refresh')
     closeForm()
   } catch (err) {
@@ -126,7 +144,7 @@ const addTask = async () => {
                  :class="formData.assigned_to ? 'text-slate-200' : 'text-slate-500'">
 
               <span class="truncate pr-2">
-                {{ users.find(u => u.id === formData.assigned_to)?.username || 'Select user...' }}
+                {{ users?.find(u => u.id === formData.assigned_to)?.username || 'Select user...' }}
               </span>
 
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500 transition-transform duration-200 shrink-0" :class="{'rotate-180': isAssigneeOpen}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,7 +158,7 @@ const addTask = async () => {
                  class="absolute z-50 w-full mt-2 bg-[#1a2130] border border-white/10 rounded-xl shadow-2xl max-h-48 overflow-y-auto py-1
                         [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full">
 
-              <div v-for="user in users" :key="user.id"
+              <div v-for="user in (users || [])" :key="user.id"
                    @click="formData.assigned_to = user.id; isAssigneeOpen = false"
                    class="px-4 py-2.5 text-sm cursor-pointer transition-colors flex items-center gap-2"
                    :class="formData.assigned_to === user.id ? 'bg-indigo-600/20 text-indigo-400 font-bold' : 'text-slate-200 hover:bg-white/5'">

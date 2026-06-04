@@ -18,7 +18,8 @@ class Task(models.Model):
         default=Category.TODO,
     )
 
-    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned_to')
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='assigned_to', null=True, blank=True)
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='tasks')
 
     def __str__(self):
         return (f"title: {self.title}\n"

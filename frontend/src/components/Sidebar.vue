@@ -9,9 +9,10 @@ const props = defineProps({
 const emit = defineEmits(['change-tab'])
 
 const sidebarItems = [
-  { id: 'board', icon: '⊞', label: 'Board' },
-  { id: 'users', icon: '◉', label: 'Users' }
+  { id: 'groups', icon: '▦', label: 'Groups' },
+  { id: 'my-tasks', icon: '▤', label: 'My Tasks' }
 ]
+
 </script>
 
 <template>

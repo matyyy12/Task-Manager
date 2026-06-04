@@ -19,7 +19,7 @@ const fetchData = async () => {
   try {
     const [usersRes, tasksRes] = await Promise.all([
       User.getAllUsers(),
-      Task.getAllTasks()
+      Task.getAll(group)
     ])
     users.value = usersRes.data
     tasks.value = tasksRes.data

@@ -9,12 +9,12 @@ class User{
     return api.post('users/', data)
   }
 
-  deleteUser(id){
-    return api.delete(`users/${id}`)
+  deleteUser(){
+    return api.delete(`users/`)
   }
 
-  updateUser(data, id){
-    return api.patch(`users/${id}`, data)
+  updateUser(data){
+    return api.patch('users/', data)
   }
 }
 

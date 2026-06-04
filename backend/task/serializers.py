@@ -5,6 +5,7 @@ from user.serializers import UserSerializer
 
 class TaskSerializer(serializers.ModelSerializer):
     assigned_to_details = UserSerializer(source = "assigned_to", read_only=True)
+    group_name = serializers.CharField(source="group.name", read_only=True)
 
     def update(self, instance, validated_data):
         if validated_data.get('completed', False) is True:
@@ -18,5 +19,5 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ['id', 'title', 'description', 'due_to', 'completed', 'assigned_to', 'assigned_to_details',
-                  'category']
-        read_only_fields = ['id']
+                  'category', 'group', 'group_name']
+        read_only_fields = ['id', 'assigned_to_details', 'group_name']

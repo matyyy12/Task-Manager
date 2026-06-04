@@ -1,8 +1,12 @@
 import api from "@/api/axios.js";
 
 class Task{
-  getAllTasks(){
-    return api.get('tasks/')
+  getAllTasks(groupId = null) {
+    const params = {};
+    if (groupId !== null) {
+      params.group = groupId;
+    }
+    return api.get('tasks/', { params });
   }
 
   createTask(data){
