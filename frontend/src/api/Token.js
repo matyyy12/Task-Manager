@@ -8,6 +8,9 @@ class Token{
   register(data){
     return api.post('users/register', data)
   }
+  logout(){
+    return api.post('tokens/logout')
+  }
 }
 
 export default new Token()

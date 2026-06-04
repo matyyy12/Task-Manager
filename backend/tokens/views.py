@@ -1,12 +1,13 @@
-from urllib import request
 from django.contrib.auth.hashers import check_password
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from user.models import User
-from django.shortcuts import render
 from rest_framework.views import APIView
+
+from .authentication import BearerAuthentication
 from .models import Token
 
 
@@ -26,7 +27,7 @@ class LoginView(APIView):
         if not check_password(password, user.password):
             return Response({'message': 'Wrong password'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        token, _ = Token.objects.get_or_create(user=user)
+        token = Token.objects.filter(user=user).first() or Token(user=user)
         token.access_token = Token.generate_key()
         token.refresh_token = Token.generate_key()
         token.access_expires_at = Token.get_access_expiry()
@@ -57,4 +58,10 @@ class RefreshView(APIView):
         return Response({'access_token': token.access_token}, status=status.HTTP_200_OK)
 
 
+class LogoutView(APIView):
+    authentication_classes = [BearerAuthentication]
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request):
+        request.auth.delete()
+        return Response({'message': 'Successfully logged out'}, status=status.HTTP_200_OK)

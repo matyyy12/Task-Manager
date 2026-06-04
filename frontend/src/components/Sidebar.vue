@@ -6,7 +6,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['change-tab'])
+const emit = defineEmits(['change-tab', 'logout'])
 
 const sidebarItems = [
   { id: 'groups', icon: '▦', label: 'Groups' },
@@ -18,7 +18,7 @@ const sidebarItems = [
 <template>
   <aside class="w-20 bg-[#0d1117] border-r border-white/5 flex flex-col items-center py-6 gap-6 flex-shrink-0 z-20 shadow-2xl">
     <div class="text-indigo-500 text-3xl font-bold mb-4">◈</div>
-    <nav class="flex flex-col gap-4 w-full px-2">
+    <nav class="flex flex-col gap-4 w-full px-2 flex-1">
 
       <div v-for="item in sidebarItems" :key="item.id"
         @click="$emit('change-tab', item.id)"
@@ -31,5 +31,15 @@ const sidebarItems = [
       </div>
 
     </nav>
+
+    <button
+      type="button"
+      @click="$emit('logout')"
+      class="flex flex-col items-center gap-1.5 py-3.5 px-1 text-[10px] uppercase tracking-tighter font-bold rounded-xl cursor-pointer transition-all text-slate-500 hover:text-red-300 hover:bg-red-500/10 w-[calc(100%-1rem)]"
+      title="Logout"
+    >
+      <span class="text-2xl">↪</span>
+      Logout
+    </button>
   </aside>
 </template>

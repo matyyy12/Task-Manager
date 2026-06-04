@@ -76,13 +76,13 @@ class InvitationView(APIView):
         user = request.user
         invitation = Invitation.objects.filter(token=token).first()
         if invitation is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Invitation not found."}, status=status.HTTP_404_NOT_FOUND)
         if invitation.expired_at < timezone.now():
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Invitation expired."}, status=status.HTTP_404_NOT_FOUND)
         if invitation.group.members.filter(pk=user.pk).exists():
-            return Response({"detail": "You are already in this group."}, status=status.HTTP_400_BAD_REQUEST)
+            serializer = GroupSerializer(invitation.group)
+            return Response(status=status.HTTP_200_OK, data=serializer.data)
 
         invitation.group.members.add(user)
         serializer = GroupSerializer(invitation.group)
         return Response(status=status.HTTP_200_OK, data=serializer.data)
-

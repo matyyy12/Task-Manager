@@ -12,6 +12,8 @@ import EditTask from "@/components/EditTask.vue";
 import InviteGroup from "@/components/InviteGroup.vue";
 import JoinGroup from "@/components/JoinGroup.vue";
 
+defineEmits(['logout'])
+
 const route = useRoute()
 const router = useRouter()
 const isAddTaskOpen = ref(false)
@@ -48,6 +50,14 @@ const handleChangeTab = (newTab) => {
 
 const handleOpenGroup = (groupId) => {
   router.push({ name: 'group', params: { id: groupId } })
+}
+
+const handleJoinedGroup = async (group) => {
+  await fetchAllGroups()
+
+  if (group?.id) {
+    router.push({ name: 'group', params: { id: group.id } })
+  }
 }
 
 
@@ -100,7 +110,7 @@ const closeEditModal = () => {
 
 <template>
   <div class="h-screen w-full bg-[#080b12] text-slate-200 overflow-hidden font-sans flex select-none">
-    <Sidebar :active-tab="activeSidebarTab" @change-tab="handleChangeTab" />
+    <Sidebar :active-tab="activeSidebarTab" @change-tab="handleChangeTab" @logout="$emit('logout')" />
     <main class="flex-1 flex flex-col min-w-0 bg-[#080b12] relative">
       <TopHeader
         :total-tasks="totalTasks"
@@ -149,7 +159,7 @@ const closeEditModal = () => {
       <JoinGroup
         :is-open="isJoinGroupOpen"
         @close="isJoinGroupOpen = false"
-        @joined="fetchAllGroups"
+        @joined="handleJoinedGroup"
       />
 
       <InviteGroup

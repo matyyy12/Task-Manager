@@ -44,8 +44,8 @@ const submitJoin = async () => {
   errorMessage.value = ''
 
   try {
-    await Groups.joinByInvitation(token)
-    emit('joined')
+    const response = await Groups.joinByInvitation(token)
+    emit('joined', response.data)
     closeModal()
   } catch (err) {
     console.error("Błąd podczas dołączania do grupy:", err)

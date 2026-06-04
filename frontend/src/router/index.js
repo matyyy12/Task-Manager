@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import AuthView from '../views/AuthView.vue'
+import InvitationView from '../views/InvitationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,6 +26,11 @@ const router = createRouter({
       name: 'group-list',
       component: HomeView,
       meta: { activeView: 'groups' },
+    },
+    {
+      path: '/group/invitation/:token',
+      name: 'group-invitation',
+      component: InvitationView,
     },
     {
       path: '/group/:id',
@@ -55,13 +61,16 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const hasToken = Boolean(localStorage.getItem('access_token'))
+  const redirect = typeof to.query.redirect === 'string' && to.query.redirect.startsWith('/') && !to.query.redirect.startsWith('//')
+    ? to.query.redirect
+    : '/home'
 
   if (to.name === 'login' && hasToken) {
-    return { name: 'home' }
+    return redirect
   }
 
   if (to.name !== 'login' && !hasToken) {
-    return { name: 'login' }
+    return { name: 'login', query: { redirect: to.fullPath } }
   }
 })
 
